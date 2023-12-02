@@ -44,9 +44,33 @@ In this example, the calibration values of these four lines are 12, 38, 15, and
 Consider your entire calibration document. What is the sum of all of the
 calibration values?
 */
-use helpers::parse_first_digit;
+use helpers::{parse_first_digit, parse_last_digit};
+
+fn sum_calibration_values(inputs: Vec<&str>) -> u32 {
+    let mut sum = 0;
+    for input in inputs {
+        let first = parse_first_digit(input) * 10;
+        let last = parse_last_digit(input);
+        let calibration_value = first + last;
+        sum += calibration_value;
+    }
+    sum
+}
 
 fn main() {
-    let first = parse_first_digit("1abc2");
-    println!("sum = {}", first);
+    let inputs = vec!["1abc2", "pqr3stu8vwx", "a1b2c3d4e5f", "treb7uchet"];
+    let sum = sum_calibration_values(inputs);
+    println!("sum = {}", sum);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn sum_calibration_values_example() {
+        let inputs = vec!["1abc2", "pqr3stu8vwx", "a1b2c3d4e5f", "treb7uchet"];
+
+        assert_eq!(sum_calibration_values(inputs), 142)
+    }
 }
