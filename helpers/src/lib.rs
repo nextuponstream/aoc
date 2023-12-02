@@ -23,9 +23,28 @@ pub fn parse_first_digit(input: &str) -> u32 {
 mod tests {
 
     use super::*;
+
     #[test]
-    fn get_easy() {
+    fn get_first_first() {
         let input = "1abc";
+        let result = parse_first_digit(input);
+        assert_eq!(result, 1);
+    }
+    #[test]
+    fn get_first_not_first() {
+        let input = "ab1c";
+        let result = parse_first_digit(input);
+        assert_eq!(result, 1);
+    }
+    #[test]
+    fn get_first_edge_case() {
+        let input = "abc1";
+        let result = parse_first_digit(input);
+        assert_eq!(result, 1);
+    }
+    #[test]
+    fn get_first_with_many() {
+        let input = "ab12c";
         let result = parse_first_digit(input);
         assert_eq!(result, 1);
     }
