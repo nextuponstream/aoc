@@ -19,6 +19,15 @@ pub fn parse_first_digit(input: &str) -> u32 {
     parsed_digit.parse::<u32>().unwrap()
 }
 
+/// # Panics
+/// Asserts that there is a digit (or crashes)
+#[must_use]
+pub fn parse_last_digit(input: &str) -> u32 {
+    let re = Regex::new(r"\d").unwrap();
+    let parsed_digit = re.find(input).unwrap().as_str();
+    parsed_digit.parse::<u32>().unwrap()
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -47,5 +56,30 @@ mod tests {
         let input = "ab12c";
         let result = parse_first_digit(input);
         assert_eq!(result, 1);
+    }
+
+    #[test]
+    fn get_last_last() {
+        let input = "abc2";
+        let result = parse_first_digit(input);
+        assert_eq!(result, 2);
+    }
+    #[test]
+    fn get_last_not_last() {
+        let input = "ab2c";
+        let result = parse_first_digit(input);
+        assert_eq!(result, 2);
+    }
+    #[test]
+    fn get_last_edge_case() {
+        let input = "2abc";
+        let result = parse_first_digit(input);
+        assert_eq!(result, 2);
+    }
+    #[test]
+    fn get_last_with_many() {
+        let input = "ab12c";
+        let result = parse_first_digit(input);
+        assert_eq!(result, 2);
     }
 }
