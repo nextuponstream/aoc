@@ -1,10 +1,18 @@
-pub fn hello_world() -> String {
-    String::from("Hello world from helper")
-}
+//! helpers file for each aoc challenge
+
+#![deny(missing_docs)]
+#![deny(clippy::missing_docs_in_private_items)]
+#![deny(rustdoc::invalid_codeblock_attributes)]
+#![warn(rustdoc::bare_urls)]
+#![deny(rustdoc::broken_intra_doc_links)]
+#![warn(clippy::pedantic)]
+#![allow(clippy::unused_async)]
 
 use regex::Regex;
 
-// Asserts that there is a digit (or crashes)
+/// # Panics
+/// Asserts that there is a digit (or crashes)
+#[must_use]
 pub fn parse_first_digit(input: &str) -> u32 {
     let re = Regex::new(r"\d").unwrap();
     let parsed_digit = re.find(input).unwrap().as_str();
@@ -19,6 +27,6 @@ mod tests {
     fn get_easy() {
         let input = "1abc";
         let result = parse_first_digit(input);
-        assert_eq!(result, 1)
+        assert_eq!(result, 1);
     }
 }
