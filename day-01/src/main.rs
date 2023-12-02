@@ -49,6 +49,9 @@ use helpers::{parse_first_digit, parse_last_digit};
 fn sum_calibration_values(inputs: Vec<&str>) -> u32 {
     let mut sum = 0;
     for input in inputs {
+        if input.is_empty() {
+            continue;
+        }
         let first = parse_first_digit(input) * 10;
         let last = parse_last_digit(input);
         let calibration_value = first + last;
@@ -58,7 +61,8 @@ fn sum_calibration_values(inputs: Vec<&str>) -> u32 {
 }
 
 fn main() {
-    let inputs = vec!["1abc2", "pqr3stu8vwx", "a1b2c3d4e5f", "treb7uchet"];
+    let text_input = String::from_utf8(std::fs::read("input.txt").unwrap()).unwrap();
+    let inputs = text_input.split('\n').collect();
     let sum = sum_calibration_values(inputs);
     println!("sum = {}", sum);
 }

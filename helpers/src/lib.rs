@@ -16,6 +16,7 @@ use regex::Regex;
 pub fn parse_first_digit(input: &str) -> u32 {
     let re = Regex::new(r"\d").unwrap();
     let parsed_digit = re.find(input).unwrap().as_str();
+    // println!("{input}");
     parsed_digit.parse::<u32>().unwrap()
 }
 
