@@ -1,5 +1,3 @@
-use helpers::hello_world;
-
 // https://adventofcode.com/2023/day/1
 
 /**
@@ -46,7 +44,9 @@ In this example, the calibration values of these four lines are 12, 38, 15, and
 Consider your entire calibration document. What is the sum of all of the
 calibration values?
 */
+use helpers::parse_first_digit;
 
 fn main() {
-    println!("{}", hello_world().as_str());
+    let first = parse_first_digit("1abc2");
+    println!("sum = {}", first);
 }

@@ -15,7 +15,15 @@ jobs:
       - name: Check tests
         run: cargo test
 
-# Tests that everything is formatted correctly.
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: rustup component add clippy
+      - run: cargo clippy -- -D warnings
+
+  # Tests that everything is formatted correctly.
   rustfmt:
     name: cargo fmt
     runs-on: ubuntu-latest
