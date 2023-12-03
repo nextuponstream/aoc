@@ -44,7 +44,27 @@ In this example, the calibration values of these four lines are 12, 38, 15, and
 Consider your entire calibration document. What is the sum of all of the
 calibration values?
 */
-use helpers::{parse_first_digit, parse_last_digit};
+use helpers::{parse_digit, parse_digit_from_text_input, parse_first_of, parse_last_of};
+
+fn parse_calibration_value(input: &str) -> u32 {
+    // let first = parse_first_digit(input) * 10;
+    // let last = parse_last_digit(input);
+    let first = parse_first_of(input, r"(\d|one|two|three|four|five|six|seven|eight|nine)");
+    let last = parse_last_of(input, r"(\d|eno|owt|eerht|ruof|evif|xis|neves|thgie|enin)");
+    let first = match parse_digit(&first) {
+        Some(d) => d * 10,
+        None => parse_digit_from_text_input(&first) * 10,
+    };
+    let last = match parse_digit(&last) {
+        Some(d) => d,
+        None => {
+            let last: String = last.chars().rev().collect();
+            parse_digit_from_text_input(&last)
+        }
+    };
+
+    first + last
+}
 
 fn sum_calibration_values(inputs: Vec<&str>) -> u32 {
     let mut sum = 0;
@@ -52,10 +72,7 @@ fn sum_calibration_values(inputs: Vec<&str>) -> u32 {
         if input.is_empty() {
             continue;
         }
-        let first = parse_first_digit(input) * 10;
-        let last = parse_last_digit(input);
-        let calibration_value = first + last;
-        sum += calibration_value;
+        sum += parse_calibration_value(input);
     }
     sum
 }
@@ -76,5 +93,35 @@ mod tests {
         let inputs = vec!["1abc2", "pqr3stu8vwx", "a1b2c3d4e5f", "treb7uchet"];
 
         assert_eq!(sum_calibration_values(inputs), 142)
+    }
+    #[test]
+    fn individual_calibration_values() {
+        let inputs = vec![
+            ("eightwothree", 83),
+            ("two1nine", 29),
+            ("abcone2threexyz", 13),
+            ("xtwone3four", 24),
+            ("4nineeightseven2", 42),
+            ("zoneight234", 14),
+            ("7pqrstsixteen", 76),
+        ];
+
+        for input in inputs {
+            assert_eq!(parse_calibration_value(input.0), input.1)
+        }
+    }
+    #[test]
+    fn sum_calibration_values_example2() {
+        let inputs = vec![
+            "two1nine",
+            "eightwothree",
+            "abcone2threexyz",
+            "xtwone3four",
+            "4nineeightseven2",
+            "zoneight234",
+            "7pqrstsixteen",
+        ];
+
+        assert_eq!(sum_calibration_values(inputs), 281)
     }
 }
