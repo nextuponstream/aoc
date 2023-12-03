@@ -1,11 +1,13 @@
-use helpers::parse_word;
+use helpers::{get_inputs, parse_word};
 
+#[derive(Default, Debug)]
 struct Pull {
     red: u32,
     green: u32,
     blue: u32,
 }
 
+#[derive(Debug)]
 struct Game {
     id: u32,
     pulls: Vec<Pull>,
@@ -13,19 +15,86 @@ struct Game {
 
 impl Game {
     fn possible_game(&self) -> bool {
-        false
+        let max_red = self
+            .pulls
+            .iter()
+            .fold(0, |max_val, val| max_val.max(val.red));
+        let max_green = self
+            .pulls
+            .iter()
+            .fold(0, |max_val, val| max_val.max(val.green));
+        let max_blue = self
+            .pulls
+            .iter()
+            .fold(0, |max_val, val| max_val.max(val.blue));
+
+        max_red <= 12 && max_green <= 13 && max_blue <= 14
     }
 }
 
+fn parse_pull_set(input: &str) -> Pull {
+    let pull_sets: Vec<&str> = input.split(',').collect();
+    let pulls: Vec<(u32, Colors)> = pull_sets.iter().map(|pull| parse_many_of(pull)).collect();
+    let mut pull = Pull::default();
+    for p in pulls {
+        match p.1 {
+            Colors::Red => pull.red += p.0,
+            Colors::Green => pull.green += p.0,
+            Colors::Blue => pull.blue += p.0,
+        }
+    }
+    pull
+}
+enum Colors {
+    Red,
+    Green,
+    Blue,
+}
+fn parse_many_of(input: &str) -> (u32, Colors) {
+    let quantity = parse_word(input, 0);
+    let color = parse_word(input, 1);
+    let color = match color {
+        "red" => Colors::Red,
+        "green" => Colors::Green,
+        "blue" => Colors::Blue,
+        _ => unreachable!(),
+    };
+
+    (quantity.parse().unwrap(), color)
+}
+
 fn parse_game(input: &str) -> Game {
-    let (game_info, pulls) = input.split_once(':').unwrap();
-    let id = parse_word(game_info, 1);
+    let (game_info_input, pulls_input) = input.split_once(':').unwrap();
+
+    let id = parse_word(game_info_input, 1);
     let id: u32 = id.parse().unwrap();
-    Game { id, pulls: vec![] }
+
+    let pulls_input: Vec<&str> = pulls_input.split(';').collect();
+    let pulls_input: Vec<Vec<&str>> = pulls_input
+        .iter()
+        .map(|p_input| p_input.split(',').collect())
+        .collect();
+
+    let mut pulls = vec![];
+    for input in pulls_input {
+        for color_input in input {
+            let pull = parse_pull_set(color_input);
+            pulls.push(pull);
+        }
+    }
+
+    Game { id, pulls }
 }
 
 fn main() {
-    println!("Hello, world!");
+    let inputs = get_inputs();
+    let sum_of_valid_game_ids: u32 = inputs
+        .iter()
+        .map(|game_input| parse_game(game_input))
+        .filter(|game| game.possible_game())
+        .map(|game| game.id)
+        .sum::<u32>();
+    println!("sum of valid game ids = {sum_of_valid_game_ids}");
 }
 
 #[cfg(test)]
@@ -36,7 +105,7 @@ mod tests {
     fn parse_game_example() {
         let game = parse_game("Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green");
         assert_eq!(game.id, 1);
-        assert_eq!(game.pulls[0].red, 4);
+        assert_eq!(game.pulls[0].red, 4, "{game:?}");
         assert_eq!(game.pulls[0].green, 0);
         assert_eq!(game.pulls[0].blue, 3);
         assert_eq!(game.pulls[1].red, 1);
@@ -63,5 +132,13 @@ mod tests {
         let ids: Vec<u32> = winning_games.iter().map(|g| g.id).collect();
         let sum_ids: u32 = ids.iter().sum();
         assert_eq!(sum_ids, 8)
+    }
+
+    #[test]
+    fn parse_pull_set_example() {
+        let pull = parse_pull_set("3 blue, 4 red");
+        assert_eq!(pull.red, 4);
+        assert_eq!(pull.blue, 3);
+        assert_eq!(pull.green, 0);
     }
 }

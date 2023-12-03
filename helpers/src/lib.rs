@@ -82,7 +82,11 @@ pub fn parse_word(input: &str, pos: usize) -> &str {
 pub fn get_inputs() -> Vec<String> {
     let text_input = String::from_utf8(std::fs::read("input.txt").unwrap()).unwrap();
     let inputs: Vec<&str> = text_input.split('\n').into_iter().collect();
-    let inputs: Vec<String> = inputs.iter().map(|s| s.to_string()).collect();
+    let inputs: Vec<String> = inputs
+        .iter()
+        .map(|s| s.to_string())
+        .filter(|s| !s.is_empty())
+        .collect();
     inputs
 }
 
