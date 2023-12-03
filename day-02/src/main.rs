@@ -1,3 +1,5 @@
+use helpers::parse_word;
+
 struct Pull {
     red: u32,
     green: u32,
@@ -16,7 +18,10 @@ impl Game {
 }
 
 fn parse_game(input: &str) -> Game {
-    todo!()
+    let (game_info, pulls) = input.split_once(':').unwrap();
+    let id = parse_word(game_info, 1);
+    let id: u32 = id.parse().unwrap();
+    Game { id, pulls: vec![] }
 }
 
 fn main() {
@@ -29,7 +34,17 @@ mod tests {
 
     #[test]
     fn parse_game_example() {
-        todo!()
+        let game = parse_game("Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green");
+        assert_eq!(game.id, 1);
+        assert_eq!(game.pulls[0].red, 4);
+        assert_eq!(game.pulls[0].green, 0);
+        assert_eq!(game.pulls[0].blue, 3);
+        assert_eq!(game.pulls[1].red, 1);
+        assert_eq!(game.pulls[1].green, 2);
+        assert_eq!(game.pulls[1].blue, 6);
+        assert_eq!(game.pulls[2].red, 0);
+        assert_eq!(game.pulls[2].green, 2);
+        assert_eq!(game.pulls[2].blue, 0);
     }
 
     #[test]

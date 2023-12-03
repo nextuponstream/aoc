@@ -68,11 +68,14 @@ pub fn parse_digit_from_text_input(input: &str) -> u32 {
     }
 }
 
-/// Parse whole number like 123
+/// Parse first, second... word given `position`
+/// # Panics
+/// when no match
 #[must_use]
-fn parse_word(input: &str) -> u32 {
-    let re = Regex::new(r"\w").unwrap();
-    return 0;
+pub fn parse_word(input: &str, pos: usize) -> &str {
+    let re = Regex::new(r"\w+").unwrap();
+    let matches: Vec<&str> = re.find_iter(input).map(|m| m.as_str()).collect();
+    matches[pos]
 }
 
 /// Returns list of inputs from 'input.txt'
@@ -148,5 +151,10 @@ mod tests {
         let input = "two1nine";
         let last = parse_last_of(input, r"(\d|eno|owt|eerht|ruof|evif|xis|neves|thgie|enin)");
         assert_eq!(last, "enin");
+    }
+    #[test]
+    fn parse_second_word() {
+        let output = parse_word("Game 1", 1);
+        assert_eq!(output, "1");
     }
 }
