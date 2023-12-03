@@ -79,12 +79,15 @@ pub fn parse_word(input: &str, pos: usize) -> &str {
 }
 
 /// Returns list of inputs from 'input.txt'
+/// # Panics
+/// when there is no file to read
+#[must_use]
 pub fn get_inputs() -> Vec<String> {
     let text_input = String::from_utf8(std::fs::read("input.txt").unwrap()).unwrap();
-    let inputs: Vec<&str> = text_input.split('\n').into_iter().collect();
+    let inputs: Vec<&str> = text_input.split('\n').collect();
     let inputs: Vec<String> = inputs
         .iter()
-        .map(|s| s.to_string())
+        .map(std::string::ToString::to_string)
         .filter(|s| !s.is_empty())
         .collect();
     inputs

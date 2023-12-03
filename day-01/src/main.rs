@@ -51,8 +51,8 @@ use helpers::{
 fn parse_calibration_value(input: &str) -> u32 {
     // let first = parse_first_digit(input) * 10;
     // let last = parse_last_digit(input);
-    let first = parse_first_of(&input, r"(\d|one|two|three|four|five|six|seven|eight|nine)");
-    let last = parse_last_of(&input, r"(\d|eno|owt|eerht|ruof|evif|xis|neves|thgie|enin)");
+    let first = parse_first_of(input, r"(\d|one|two|three|four|five|six|seven|eight|nine)");
+    let last = parse_last_of(input, r"(\d|eno|owt|eerht|ruof|evif|xis|neves|thgie|enin)");
     let first = match parse_digit(&first) {
         Some(d) => d * 10,
         None => parse_digit_from_text_input(&first) * 10,
