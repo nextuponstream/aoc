@@ -44,13 +44,15 @@ In this example, the calibration values of these four lines are 12, 38, 15, and
 Consider your entire calibration document. What is the sum of all of the
 calibration values?
 */
-use helpers::{parse_digit, parse_digit_from_text_input, parse_first_of, parse_last_of};
+use helpers::{
+    get_inputs, parse_digit, parse_digit_from_text_input, parse_first_of, parse_last_of,
+};
 
 fn parse_calibration_value(input: &str) -> u32 {
     // let first = parse_first_digit(input) * 10;
     // let last = parse_last_digit(input);
-    let first = parse_first_of(input, r"(\d|one|two|three|four|five|six|seven|eight|nine)");
-    let last = parse_last_of(input, r"(\d|eno|owt|eerht|ruof|evif|xis|neves|thgie|enin)");
+    let first = parse_first_of(&input, r"(\d|one|two|three|four|five|six|seven|eight|nine)");
+    let last = parse_last_of(&input, r"(\d|eno|owt|eerht|ruof|evif|xis|neves|thgie|enin)");
     let first = match parse_digit(&first) {
         Some(d) => d * 10,
         None => parse_digit_from_text_input(&first) * 10,
@@ -78,8 +80,8 @@ fn sum_calibration_values(inputs: Vec<&str>) -> u32 {
 }
 
 fn main() {
-    let text_input = String::from_utf8(std::fs::read("input.txt").unwrap()).unwrap();
-    let inputs = text_input.split('\n').collect();
+    let inputs = get_inputs();
+    let inputs = inputs.iter().map(|s| s.as_str()).collect();
     let sum = sum_calibration_values(inputs);
     println!("sum = {}", sum);
 }

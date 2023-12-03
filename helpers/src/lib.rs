@@ -68,6 +68,21 @@ pub fn parse_digit_from_text_input(input: &str) -> u32 {
     }
 }
 
+/// Parse whole number like 123
+#[must_use]
+fn parse_word(input: &str) -> u32 {
+    let re = Regex::new(r"\w").unwrap();
+    return 0;
+}
+
+/// Returns list of inputs from 'input.txt'
+pub fn get_inputs() -> Vec<String> {
+    let text_input = String::from_utf8(std::fs::read("input.txt").unwrap()).unwrap();
+    let inputs: Vec<&str> = text_input.split('\n').into_iter().collect();
+    let inputs: Vec<String> = inputs.iter().map(|s| s.to_string()).collect();
+    inputs
+}
+
 #[cfg(test)]
 mod tests {
 
