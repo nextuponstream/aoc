@@ -1,9 +1,8 @@
 use helpers::{
-    capture_any_words_with_those_characters,
-    capture_any_words_with_those_characters_with_positions, check_char_belongs_to_group,
-    get_inputs,
+    capture_any_words_with_those_characters_with_positions, check_char_belongs_to_group, get_inputs,
 };
 
+#[derive(Debug)]
 struct EngineSchematic {
     part_numbers: Vec<u32>,
 }
@@ -16,36 +15,53 @@ impl EngineSchematic {
             let matches = capture_any_words_with_those_characters_with_positions(&line, r"\d+");
 
             for (part_number, start, end) in matches {
+                println!("{}", part_number);
                 let number: u32 = part_number.parse().unwrap();
 
                 if start > 0 {
                     // check left of part number
-                    if check_char_belongs_to_group(line.chars().nth(0).unwrap(), r"\d|\.") {
+                    if !check_char_belongs_to_group(line.chars().nth(0).unwrap(), r"\d|\.") {
                         part_numbers.push(number);
                         continue;
                     }
-                } else if end < line.len() {
+                }
+                if end < line.len() {
                     // check right of part number
-                    if check_char_belongs_to_group(
+                    if !check_char_belongs_to_group(
                         line.chars().nth(line.len() - 1).unwrap(),
                         r"\d|\.",
                     ) {
                         part_numbers.push(number);
                         continue;
                     }
-                } else {
-                    // check above and below
-                    todo!()
+                }
+
+                let start_index = (start - 1).max(0);
+                let end_index = (end + 1).min(line.len());
+                if i > 0 {
+                    for idx in 0..end_index - start_index {
+                        let upper_line = inputs[i - 1].clone();
+                        let c = upper_line.chars().nth(idx).unwrap();
+                        if !check_char_belongs_to_group(c, r"\d|\.") {
+                            part_numbers.push(number);
+                            continue;
+                        }
+                    }
+                }
+                if i < inputs.len() - 1 {
+                    let bottom_line = inputs[i + 1].clone();
+                    for idx in 0..end_index - start_index {
+                        let c = bottom_line.chars().nth(idx).unwrap();
+                        if !check_char_belongs_to_group(c, r"\d|\.") {
+                            part_numbers.push(number);
+                            continue;
+                        }
+                    }
                 }
             }
         }
         Self { part_numbers }
     }
-}
-
-fn parse_numbers_in_a_line(input: &str) -> Vec<u32> {
-    let raw_numbers = capture_any_words_with_those_characters(input, r"\d+");
-    raw_numbers.iter().map(|raw| raw.parse().unwrap()).collect()
 }
 
 fn main() {
@@ -58,14 +74,6 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn parse_numbers_example() {
-        let input = "467..114..";
-        let parsed_numbers = parse_numbers_in_a_line(input);
-        assert!(parsed_numbers.contains(&467), "{parsed_numbers:?}");
-        assert!(parsed_numbers.contains(&114));
-    }
 
     #[test]
     fn parse_engine_schematic_example_1() {
@@ -88,7 +96,7 @@ mod tests {
         let inputs = vec!["467*".to_string()];
         let engine = EngineSchematic::new(inputs);
 
-        assert!(engine.part_numbers.contains(&467));
+        assert!(engine.part_numbers.contains(&467), "{engine:?}");
         assert_eq!(engine.part_numbers.len(), 1);
     }
 }
