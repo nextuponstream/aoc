@@ -80,6 +80,21 @@ pub fn capture_any_words_with_those_characters(input: &str, regex: &str) -> Vec<
         .map(std::string::ToString::to_string)
         .collect()
 }
+#[must_use]
+/// Example: given regex \d*, in a line like "467..114.." returns "467" & "114"
+/// # Panics
+/// when no match
+pub fn capture_any_words_with_those_characters_with_positions(
+    input: &str,
+    regex: &str,
+) -> Vec<(String, usize, usize)> {
+    let re = Regex::new(regex).unwrap();
+    let matches: Vec<(String, usize, usize)> = re
+        .find_iter(input)
+        .map(|m| (m.as_str().to_string(), m.start(), m.end()))
+        .collect();
+    matches
+}
 
 /// Parse first, second... word given `position`
 /// # Panics
@@ -104,6 +119,15 @@ pub fn get_inputs() -> Vec<String> {
         .filter(|s| !s.is_empty())
         .collect();
     inputs
+}
+
+/// Check if character belongs to set
+/// # Panics
+/// when regex is faulty
+#[must_use]
+pub fn check_char_belongs_to_group(char: char, regex: &str) -> bool {
+    let re = Regex::new(regex).unwrap();
+    matches!(re.find(char.to_string().as_str()), Some(_m))
 }
 
 #[cfg(test)]
@@ -183,5 +207,22 @@ mod tests {
         let matches = capture_any_words_with_those_characters(input, r"\d+");
         assert!(matches.contains(&"467".to_string()));
         assert!(matches.contains(&"114".to_string()));
+    }
+    #[test]
+    fn parse_words_given_regex_with_position_example() {
+        let input = "467..114..";
+        let matches = capture_any_words_with_those_characters_with_positions(input, r"\d+");
+        assert_eq!(matches[0].0, "467");
+        assert_eq!(matches[0].1, 0);
+        assert_eq!(matches[0].2, 3);
+        assert_eq!(matches[1].0, "114");
+        assert_eq!(matches[1].1, 5);
+        assert_eq!(matches[1].2, 8);
+    }
+    #[test]
+    fn belongs_to_whitelist_example() {
+        assert!(check_char_belongs_to_group('.', r"\d|\."));
+        assert!(check_char_belongs_to_group('3', r"\d|\."));
+        assert!(!check_char_belongs_to_group('#', r"\d|\."));
     }
 }
