@@ -14,21 +14,27 @@ struct Game {
 }
 
 impl Game {
+    fn max_red(&self) -> u32 {
+        self.pulls
+            .iter()
+            .fold(0, |max_val, val| max_val.max(val.red))
+    }
+    fn max_green(&self) -> u32 {
+        self.pulls
+            .iter()
+            .fold(0, |max_val, val| max_val.max(val.green))
+    }
+    fn max_blue(&self) -> u32 {
+        self.pulls
+            .iter()
+            .fold(0, |max_val, val| max_val.max(val.blue))
+    }
     fn possible_game(&self) -> bool {
-        let max_red = self
-            .pulls
-            .iter()
-            .fold(0, |max_val, val| max_val.max(val.red));
-        let max_green = self
-            .pulls
-            .iter()
-            .fold(0, |max_val, val| max_val.max(val.green));
-        let max_blue = self
-            .pulls
-            .iter()
-            .fold(0, |max_val, val| max_val.max(val.blue));
-
-        max_red <= 12 && max_green <= 13 && max_blue <= 14
+        self.max_red() <= 12 && self.max_green() <= 13 && self.max_blue() <= 14
+    }
+    fn power(&self) -> u32 {
+        // minimum number of cubes for each types multiplied together
+        self.max_red() * self.max_green() * self.max_blue()
     }
 }
 
@@ -95,6 +101,14 @@ fn main() {
         .map(|game| game.id)
         .sum::<u32>();
     println!("sum of valid game ids = {sum_of_valid_game_ids}");
+
+    // part 2
+    let sum_of_powers: u32 = inputs
+        .iter()
+        .map(|game_input| parse_game(game_input))
+        .map(|game| game.power())
+        .sum::<u32>();
+    println!("sum of power is = {sum_of_powers}");
 }
 
 #[cfg(test)]
@@ -141,5 +155,29 @@ mod tests {
         assert_eq!(pull.red, 4);
         assert_eq!(pull.blue, 3);
         assert_eq!(pull.green, 0);
+    }
+
+    #[test]
+    fn power_examples() {
+        let game_input = "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green";
+        let game = parse_game(game_input);
+
+        assert_eq!(game.power(), 48);
+    }
+
+    #[test]
+    fn sum_powers_example() {
+        let games: Vec<Game> = vec![
+            "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green",
+            "Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue",
+            "Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red",
+            "Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red",
+            "Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green",
+        ]
+        .into_iter()
+        .map(parse_game)
+        .collect();
+        let sum_of_powers: u32 = games.iter().map(|game| game.power()).sum::<u32>();
+        assert_eq!(sum_of_powers, 2286)
     }
 }
