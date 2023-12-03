@@ -1,4 +1,4 @@
-use helpers::get_inputs;
+use helpers::{capture_any_words_with_those_characters, get_inputs};
 
 struct EngineSchematic {
     part_numbers: Vec<u32>,
@@ -11,7 +11,9 @@ impl EngineSchematic {
 }
 
 fn parse_numbers_in_a_line(input: &str) -> Vec<u32> {
-    vec![]
+    let raw_numbers = capture_any_words_with_those_characters(input, r"\d+");
+    println!("{raw_numbers:?}");
+    raw_numbers.iter().map(|raw| raw.parse().unwrap()).collect()
 }
 
 fn main() {
@@ -27,7 +29,7 @@ mod tests {
     fn parse_numbers_example() {
         let input = "467..114..";
         let parsed_numbers = parse_numbers_in_a_line(input);
-        assert!(parsed_numbers.contains(&467));
+        assert!(parsed_numbers.contains(&467), "{parsed_numbers:?}");
         assert!(parsed_numbers.contains(&114));
     }
 

@@ -68,6 +68,19 @@ pub fn parse_digit_from_text_input(input: &str) -> u32 {
     }
 }
 
+#[must_use]
+/// Example: given regex \d*, in a line like "467..114.." returns "467" & "114"
+/// # Panics
+/// when no match
+pub fn capture_any_words_with_those_characters(input: &str, regex: &str) -> Vec<String> {
+    let re = Regex::new(regex).unwrap();
+    let matches: Vec<&str> = re.find_iter(input).map(|m| m.as_str()).collect();
+    matches
+        .iter()
+        .map(std::string::ToString::to_string)
+        .collect()
+}
+
 /// Parse first, second... word given `position`
 /// # Panics
 /// when no match
@@ -163,5 +176,12 @@ mod tests {
     fn parse_second_word() {
         let output = parse_word("Game 1", 1);
         assert_eq!(output, "1");
+    }
+    #[test]
+    fn parse_words_given_regex_example() {
+        let input = "467..114..";
+        let matches = capture_any_words_with_those_characters(input, r"\d+");
+        assert!(matches.contains(&"467".to_string()));
+        assert!(matches.contains(&"114".to_string()));
     }
 }

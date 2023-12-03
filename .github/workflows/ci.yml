@@ -14,6 +14,8 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
       - name: Check tests
         run: cargo test
+      - name: Check tests in helpers
+        run: cargo test -p helpers
 
   clippy:
     name: Clippy
