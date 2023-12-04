@@ -1,10 +1,17 @@
-use helpers::get_inputs;
+use helpers::{capture_any_words_with_those_characters, get_inputs};
 
 #[derive(Debug)]
 struct Card {
     winning_numbers: Vec<u32>,
     numbers: Vec<u32>,
 }
+
+impl Card {
+    fn point_worth(&self) -> u32 {
+        0
+    }
+}
+
 #[derive(Debug, Default)]
 struct PileOfCards {
     cards: Vec<Card>,
@@ -12,11 +19,35 @@ struct PileOfCards {
 
 impl PileOfCards {
     fn point_worth(&self) -> u32 {
-        0
+        self.cards
+            .iter()
+            .map(|c| c.point_worth())
+            .collect::<Vec<u32>>()
+            .iter()
+            .sum()
     }
 
-    fn new(cards_input: Vec<String>) -> Self {
-        Self::default()
+    fn new(card_inputs: Vec<String>) -> Self {
+        let mut cards = vec![];
+        for input in card_inputs {
+            let number_inputs = input.split_once(':').unwrap().1;
+            let (winning_numbers_input, numbers_input) = number_inputs.split_once('|').unwrap();
+
+            let winning_numbers =
+                capture_any_words_with_those_characters(winning_numbers_input, r"\d+");
+            let winning_numbers: Vec<u32> =
+                winning_numbers.iter().map(|n| n.parse().unwrap()).collect();
+
+            let numbers = capture_any_words_with_those_characters(numbers_input, r"\d+");
+            let numbers: Vec<u32> = numbers.iter().map(|n| n.parse().unwrap()).collect();
+
+            let card = Card {
+                winning_numbers,
+                numbers,
+            };
+            cards.push(card);
+        }
+        Self { cards }
     }
 }
 
