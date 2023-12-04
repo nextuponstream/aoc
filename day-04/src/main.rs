@@ -8,7 +8,17 @@ struct Card {
 
 impl Card {
     fn point_worth(&self) -> u32 {
-        0
+        let mut i = 0;
+        for n in self.numbers.iter() {
+            if self.winning_numbers.contains(n) {
+                i += 1;
+            }
+        }
+
+        match i {
+            0 => 0,
+            _ => 2u32.pow(i - 1),
+        }
     }
 }
 
@@ -74,5 +84,33 @@ mod tests {
         let pile = PileOfCards::new(inputs);
 
         assert_eq!(pile.point_worth(), 13)
+    }
+
+    #[test]
+    fn card_point_worth_example1() {
+        let card = Card {
+            winning_numbers: vec![41, 48, 83, 86, 17],
+            numbers: vec![83, 86, 6, 31, 17, 9, 48, 53],
+        };
+
+        assert_eq!(card.point_worth(), 8, "{card:?}")
+    }
+    #[test]
+    fn card_point_worth_example2() {
+        let card = Card {
+            winning_numbers: vec![13, 32, 20, 16, 61],
+            numbers: vec![61, 30, 68, 82, 17, 32, 24, 19],
+        };
+
+        assert_eq!(card.point_worth(), 2, "{card:?}")
+    }
+    #[test]
+    fn card_point_worth_example3() {
+        let card = Card {
+            winning_numbers: vec![87, 83, 26, 28, 32],
+            numbers: vec![88, 30, 70, 12, 93, 22, 82, 36],
+        };
+
+        assert_eq!(card.point_worth(), 0, "{card:?}")
     }
 }

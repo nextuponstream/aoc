@@ -69,7 +69,7 @@ pub fn parse_digit_from_text_input(input: &str) -> u32 {
 }
 
 #[must_use]
-/// Example: given regex \d*, in a line like "467..114.." returns "467" & "114"
+/// Example: given regex \d+, in a line like "467..114.." returns "467" & "114"
 /// # Panics
 /// when no match
 pub fn capture_any_words_with_those_characters(input: &str, regex: &str) -> Vec<String> {
