@@ -126,6 +126,6 @@ humidity-to-location map:
         assert!(almanac.seeds.contains(&55), "{almanac:?}");
         assert!(almanac.seeds.contains(&13), "{almanac:?}");
         assert_eq!(almanac.seeds.len(), 4, "{almanac:?}");
-        assert_eq!(almanac.lowest_location_number(), 35, "{almanac:?}")
+        assert_eq!(almanac.lowest_location_number(), 46, "{almanac:?}")
     }
 }
