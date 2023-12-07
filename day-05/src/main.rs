@@ -1,6 +1,6 @@
 use helpers::get_input;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 struct ConversionMap {
     /// src_start, dest_start, range
     mappings: Vec<(u32, u32, u32)>,
@@ -15,7 +15,7 @@ struct Almanac {
 impl Almanac {
     fn new(input: String) -> Self {
         let sections: Vec<&str> = input.split("\n\n").collect();
-        println!("{sections:?}");
+        // println!("{sections:?}");
         let seeds_input = sections[0];
         let seeds_input = seeds_input.split_once(':').unwrap().1;
         let seeds_numbers: Vec<&str> = seeds_input.split_whitespace().collect();
@@ -23,14 +23,50 @@ impl Almanac {
         for seed in seeds_numbers {
             seeds.push(seed.parse().unwrap())
         }
-        Self {
-            seeds,
-            maps: vec![],
+
+        let map_inputs = sections.split_at(1).1;
+        let mut maps: Vec<ConversionMap> = vec![];
+        for input in map_inputs {
+            let mut map = ConversionMap::default();
+            let mapping_inputs: Vec<&str> = input.split('\n').collect();
+            let mapping_inputs = mapping_inputs.split_at(1).1;
+            for mapping_input in mapping_inputs {
+                if mapping_input == &"" {
+                    continue;
+                }
+                let src_start = helpers::parse_word(mapping_input, 0).parse().unwrap();
+                let dest_start = helpers::parse_word(mapping_input, 1).parse().unwrap();
+                let range = helpers::parse_word(mapping_input, 2).parse().unwrap();
+                let mapping = (src_start, dest_start, range);
+                map.mappings.push(mapping);
+            }
+
+            maps.push(map)
         }
+
+        Self { seeds, maps }
     }
 
     fn lowest_location_number(&self) -> u32 {
-        1000
+        let mut lowest = u32::MAX;
+        for seed in &self.seeds {
+            let mut input: u32 = *seed;
+
+            for map in &self.maps {
+                // convert
+                if let Some(mapping) = map.mappings.iter().find(|m| {
+                    let range = m.1..(m.1 + m.2);
+                    range.contains(&input)
+                }) {
+                    input = mapping.0 + (input - mapping.1);
+                }
+            }
+
+            // all mapping done
+            lowest = lowest.min(input);
+        }
+
+        lowest
     }
 }
 
@@ -47,10 +83,7 @@ fn main() {
 mod tests {
     use super::*;
 
-    #[test]
-    fn almanac_example_1() {
-        let almanac = Almanac::new(
-            "seeds: 79 14 55 13
+    const TEST_INPUT: &str = "seeds: 79 14 55 13
 
 seed-to-soil map:
 50 98 2
@@ -83,9 +116,11 @@ temperature-to-humidity map:
 humidity-to-location map:
 60 56 37
 56 93 4
-"
-            .into(),
-        );
+";
+
+    #[test]
+    fn almanac_example_1() {
+        let almanac = Almanac::new(TEST_INPUT.into());
         assert!(almanac.seeds.contains(&79), "{almanac:?}");
         assert!(almanac.seeds.contains(&14), "{almanac:?}");
         assert!(almanac.seeds.contains(&55), "{almanac:?}");
