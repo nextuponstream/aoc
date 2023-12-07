@@ -19,13 +19,6 @@ impl std::default::Default for HandsValue {
     }
 }
 
-fn card_strength(first: char, second: char) -> Option<bool> {
-    match (first, second) {
-        (f, s) if f == 'A' && s != 'A' => Some(true),
-        _ => None,
-    }
-}
-
 #[derive(Debug, Default)]
 struct Hands {
     /// sorted
@@ -44,38 +37,42 @@ impl Hand {
         let (hand_input, bid_input) = input.split_once(' ').unwrap();
         assert!(hand_input.len() == 5, "bad hand: {input}");
         let mut hand = HandsValue::HighCard(hand_input.to_string());
-        for count in (2..5).rev() {
-            let vals = vec!['A', 'K', 'Q', 'J', '9', '8', '7', '6', '5', '4', '3', '2'];
+        let vals = vec![
+            'A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2',
+        ];
 
-            for v in vals {
-                if hand_input.chars().filter(|c| c == &v).count() == count {
-                    match count {
-                        5 => hand = HandsValue::FiveOf(hand_input.to_string()),
-                        4 => hand = HandsValue::FourOf(hand_input.to_string()),
-                        3 => {
-                            let other_chars: Vec<char> =
-                                hand_input.chars().filter(|c| c != &v).collect();
-                            if other_chars[0] == other_chars[1] {
-                                hand = HandsValue::FullHouse(hand_input.to_string())
-                            } else {
-                                hand = HandsValue::ThreeOf(hand_input.to_string())
-                            }
-                        }
-                        2 => {
-                            let other_chars: Vec<char> =
-                                hand_input.chars().filter(|c| c != &v).collect();
-                            if other_chars[0] == other_chars[1]
-                                || other_chars[1] == other_chars[2]
-                                || other_chars[2] == other_chars[0]
-                            {
-                                hand = HandsValue::TwoPairs(hand_input.to_string())
-                            } else {
-                                hand = HandsValue::OnePair(hand_input.to_string())
-                            }
-                        }
-                        _ => {}
+        for v in vals {
+            match hand_input.chars().filter(|c| c == &v).count() {
+                5 => {
+                    hand = HandsValue::FiveOf(hand_input.to_string());
+                    break;
+                }
+                4 => {
+                    hand = HandsValue::FourOf(hand_input.to_string());
+                    break;
+                }
+                3 => {
+                    let other_chars: Vec<char> = hand_input.chars().filter(|c| c != &v).collect();
+                    if other_chars[0] == other_chars[1] {
+                        hand = HandsValue::FullHouse(hand_input.to_string())
+                    } else {
+                        hand = HandsValue::ThreeOf(hand_input.to_string())
                     }
                 }
+                2 => {
+                    let other_chars: Vec<char> = hand_input.chars().filter(|c| c != &v).collect();
+                    if other_chars[0] == other_chars[1] && other_chars[1] == other_chars[2] {
+                        hand = HandsValue::FullHouse(hand_input.to_string());
+                    } else if other_chars[0] == other_chars[1]
+                        || other_chars[1] == other_chars[2]
+                        || other_chars[2] == other_chars[0]
+                    {
+                        hand = HandsValue::TwoPairs(hand_input.to_string())
+                    } else {
+                        hand = HandsValue::OnePair(hand_input.to_string())
+                    }
+                }
+                _ => {}
             }
         }
 
@@ -175,5 +172,40 @@ mod tests {
     #[test]
     fn handTypeSort() {
         assert!(HandsValue::FiveOf(String::default()) > HandsValue::FourOf(String::default()));
+    }
+
+    #[test]
+    fn full_house() {
+        let hand = Hand::new("QQQJJ 2".to_string());
+        if let HandsValue::FullHouse(_) = hand.hand {
+        } else {
+            panic!("oh no QQQJJ not a full house, {hand:?}")
+        }
+        let hand = Hand::new("QJQJQ 2".to_string());
+        if let HandsValue::FullHouse(_) = hand.hand {
+        } else {
+            panic!("oh no QQQJJ not a full house, {hand:?}")
+        }
+        let hand = Hand::new("JJQQQ 2".to_string());
+        if let HandsValue::FullHouse(_) = hand.hand {
+        } else {
+            panic!("oh no QQQJJ not a full house, {hand:?}")
+        }
+    }
+    #[test]
+    fn three_of() {
+        let hand = Hand::new("QQQAJ 2".to_string());
+        if let HandsValue::ThreeOf(_) = hand.hand {
+        } else {
+            panic!("oh no QQQAJ is not a triple {hand:?}")
+        }
+    }
+    #[test]
+    fn pair() {
+        let hand = Hand::new("QQ9AJ 2".to_string());
+        if let HandsValue::OnePair(_) = hand.hand {
+        } else {
+            panic!("oh no QQ9AJ is not a pair {hand:?}")
+        }
     }
 }
