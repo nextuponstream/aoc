@@ -3,12 +3,12 @@ use helpers::get_input;
 #[derive(Debug, Default)]
 struct ConversionMap {
     /// src_start, dest_start, range
-    mappings: Vec<(u32, u32, u32)>,
+    mappings: Vec<(u64, u64, u64)>,
 }
 
 #[derive(Default, Debug)]
 struct Almanac {
-    seeds: Vec<u32>,
+    seeds: Vec<u64>,
     maps: Vec<ConversionMap>,
 }
 
@@ -19,7 +19,7 @@ impl Almanac {
         let seeds_input = sections[0];
         let seeds_input = seeds_input.split_once(':').unwrap().1;
         let seeds_numbers: Vec<&str> = seeds_input.split_whitespace().collect();
-        let mut seeds: Vec<u32> = vec![];
+        let mut seeds: Vec<u64> = vec![];
         for seed in seeds_numbers {
             seeds.push(seed.parse().unwrap())
         }
@@ -47,10 +47,10 @@ impl Almanac {
         Self { seeds, maps }
     }
 
-    fn lowest_location_number(&self) -> u32 {
-        let mut lowest = u32::MAX;
+    fn lowest_location_number(&self) -> u64 {
+        let mut lowest = u64::MAX;
         for seed in &self.seeds {
-            let mut input: u32 = *seed;
+            let mut input: u64 = *seed;
 
             for map in &self.maps {
                 // convert
