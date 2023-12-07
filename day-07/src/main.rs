@@ -166,7 +166,7 @@ mod tests {
             "QQQJA 483".to_string(),
         ];
         let hands = Hands::new(inputs);
-        assert_eq!(hands.winnings(), 6440, "{hands:?}");
+        assert_eq!(hands.winnings(), 5905, "{hands:?}");
     }
 
     #[test]
@@ -176,36 +176,36 @@ mod tests {
 
     #[test]
     fn full_house() {
-        let hand = Hand::new("QQQJJ 2".to_string());
+        let hand = Hand::new("QQQAA 2".to_string());
         if let HandsValue::FullHouse(_) = hand.hand {
         } else {
-            panic!("oh no QQQJJ not a full house, {hand:?}")
+            panic!("oh no QQQAA not a full house, {hand:?}")
         }
-        let hand = Hand::new("QJQJQ 2".to_string());
+        let hand = Hand::new("QAQAQ 2".to_string());
         if let HandsValue::FullHouse(_) = hand.hand {
         } else {
-            panic!("oh no QQQJJ not a full house, {hand:?}")
+            panic!("oh no QQQAA not a full house, {hand:?}")
         }
-        let hand = Hand::new("JJQQQ 2".to_string());
+        let hand = Hand::new("AAQQQ 2".to_string());
         if let HandsValue::FullHouse(_) = hand.hand {
         } else {
-            panic!("oh no QQQJJ not a full house, {hand:?}")
+            panic!("oh no QQQAA not a full house, {hand:?}")
         }
     }
     #[test]
     fn three_of() {
-        let hand = Hand::new("QQQAJ 2".to_string());
+        let hand = Hand::new("QQQAT 2".to_string());
         if let HandsValue::ThreeOf(_) = hand.hand {
         } else {
-            panic!("oh no QQQAJ is not a triple {hand:?}")
+            panic!("oh no QQQAT is not a triple {hand:?}")
         }
     }
     #[test]
     fn pair() {
-        let hand = Hand::new("QQ9AJ 2".to_string());
+        let hand = Hand::new("QQ9AT 2".to_string());
         if let HandsValue::OnePair(_) = hand.hand {
         } else {
-            panic!("oh no QQ9AJ is not a pair {hand:?}")
+            panic!("oh no QQ9AT is not a pair {hand:?}")
         }
     }
 }
