@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use helpers::get_input;
 
 #[derive(Debug, Default)]
@@ -8,7 +10,7 @@ struct ConversionMap {
 
 #[derive(Default, Debug)]
 struct Almanac {
-    seeds: Vec<u64>,
+    seeds: HashSet<u64>,
     maps: Vec<ConversionMap>,
 }
 
@@ -19,9 +21,13 @@ impl Almanac {
         let seeds_input = sections[0];
         let seeds_input = seeds_input.split_once(':').unwrap().1;
         let seeds_numbers: Vec<&str> = seeds_input.split_whitespace().collect();
-        let mut seeds: Vec<u64> = vec![];
-        for seed in seeds_numbers {
-            seeds.push(seed.parse().unwrap())
+        let mut seeds: HashSet<u64> = HashSet::default();
+        for i in (0..seeds_numbers.len()).step_by(2) {
+            let start = seeds_numbers[i].parse().unwrap();
+            let range: u64 = seeds_numbers[i + 1].parse().unwrap();
+            for s in start..start + range {
+                seeds.insert(s);
+            }
         }
 
         let map_inputs = sections.split_at(1).1;
@@ -121,11 +127,11 @@ humidity-to-location map:
     #[test]
     fn almanac_example_1() {
         let almanac = Almanac::new(TEST_INPUT.into());
-        assert!(almanac.seeds.contains(&79), "{almanac:?}");
-        assert!(almanac.seeds.contains(&14), "{almanac:?}");
-        assert!(almanac.seeds.contains(&55), "{almanac:?}");
-        assert!(almanac.seeds.contains(&13), "{almanac:?}");
-        assert_eq!(almanac.seeds.len(), 4, "{almanac:?}");
+        // assert!(almanac.seeds.contains(&79), "{almanac:?}");
+        // assert!(almanac.seeds.contains(&14), "{almanac:?}");
+        // assert!(almanac.seeds.contains(&55), "{almanac:?}");
+        // assert!(almanac.seeds.contains(&13), "{almanac:?}");
+        // assert_eq!(almanac.seeds.len(), 4, "{almanac:?}");
         assert_eq!(almanac.lowest_location_number(), 46, "{almanac:?}")
     }
 }
