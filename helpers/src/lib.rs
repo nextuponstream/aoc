@@ -120,6 +120,13 @@ pub fn get_inputs() -> Vec<String> {
         .collect();
     inputs
 }
+/// Returns input from 'input.txt'
+/// # Panics
+/// when there is no file to read
+#[must_use]
+pub fn get_input() -> String {
+    String::from_utf8(std::fs::read("input.txt").unwrap()).unwrap()
+}
 
 /// Check if character belongs to set
 /// # Panics
