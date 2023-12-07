@@ -1,6 +1,7 @@
-use std::collections::HashSet;
-
 use helpers::get_input;
+use rayon::prelude::*;
+// use std::collections::HashSet;
+// use std::sync::{Arc, RwLock};
 
 #[derive(Debug, Default)]
 struct ConversionMap {
@@ -10,7 +11,7 @@ struct ConversionMap {
 
 #[derive(Default, Debug)]
 struct Almanac {
-    seeds: HashSet<u64>,
+    seeds: Vec<(u64, u64)>,
     maps: Vec<ConversionMap>,
 }
 
@@ -21,14 +22,14 @@ impl Almanac {
         let seeds_input = sections[0];
         let seeds_input = seeds_input.split_once(':').unwrap().1;
         let seeds_numbers: Vec<&str> = seeds_input.split_whitespace().collect();
-        let mut seeds: HashSet<u64> = HashSet::default();
+        let mut seeds: Vec<(u64, u64)> = vec![];
         for i in (0..seeds_numbers.len()).step_by(2) {
             let start = seeds_numbers[i].parse().unwrap();
             let range: u64 = seeds_numbers[i + 1].parse().unwrap();
-            for s in start..start + range {
-                seeds.insert(s);
-            }
+            println!("inserting {range} from index {start}...");
+            seeds.push((start, range));
         }
+        println!("total seeds: {}", seeds.len());
 
         let map_inputs = sections.split_at(1).1;
         let mut maps: Vec<ConversionMap> = vec![];
@@ -54,25 +55,56 @@ impl Almanac {
     }
 
     fn lowest_location_number(&self) -> u64 {
-        let mut lowest = u64::MAX;
-        for seed in &self.seeds {
-            let mut input: u64 = *seed;
+        // let mut lowest = u64::MAX;
+        // let known_mappings: Arc<RwLock<HashMap<u64, u64>>> =
+        //     Arc::new(RwLock::new(HashMap::default()));
+        self.seeds
+            .par_iter()
+            .map(|seed| {
+                let (start, range): (u64, u64) = *seed;
+                // println!("iterating over {start} + {range}...");
 
-            for map in &self.maps {
-                // convert
-                if let Some(mapping) = map.mappings.iter().find(|m| {
-                    let range = m.1..(m.1 + m.2);
-                    range.contains(&input)
-                }) {
-                    input = mapping.0 + (input - mapping.1);
-                }
-            }
+                let range = start..start + range;
+                let lowest_in_range = range.into_par_iter().map(|input_idx| {
+                    // println!("...{input_idx}");
+                    let mut input = input_idx;
+                    // let read_mappings = known_mappings.read().unwrap();
+                    // if read_mappings.contains_key(&input) {
+                    //     // println!("reuse for key {input}! {read_mappings:?}");
+                    //     println!("reuse for key {input}!");
+                    //     return (input_idx, *read_mappings.get(&input).unwrap());
+                    // }
 
-            // all mapping done
-            lowest = lowest.min(input);
-        }
+                    for map in &self.maps {
+                        // convert
+                        if let Some(mapping) = map.mappings.par_iter().find_first(|m| {
+                            let range = m.1..(m.1 + m.2);
+                            range.contains(&input)
+                        }) {
+                            input = mapping.0 + (input - mapping.1);
+                        }
+                    }
 
-        lowest
+                    (input_idx, input)
+
+                    // all mapping done
+                });
+
+                // let normal: Vec<(u64, u64)> = lowest_in_range.clone().collect();
+                // let mut writtable_map = known_mappings.write().unwrap();
+                // for (k, v) in normal {
+                //     writtable_map.insert(k, v);
+                // }
+                // drops the lock but not the hashset
+                // std::mem::drop(writtable_map);
+
+                lowest_in_range.min_by_key(|x| x.1).unwrap().1
+            })
+            .min()
+            .unwrap()
+        // let mut writtable_map = known_mappings.write().unwrap();
+        // println!("{:?}", writtable_map);
+        // lowest
     }
 }
 
