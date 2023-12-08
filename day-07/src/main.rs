@@ -36,45 +36,46 @@ impl Hand {
     fn new(input: String) -> Self {
         let (hand_input, bid_input) = input.split_once(' ').unwrap();
         assert!(hand_input.len() == 5, "bad hand: {input}");
-        let mut hand = HandsValue::HighCard(hand_input.to_string());
-        let vals = vec![
-            'A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2',
+        let vals = [
+            'A', 'K', 'Q', 'T', '9', '8', '7', '6', '5', '4', '3', '2', 'J',
         ];
 
-        for v in vals {
-            match hand_input.chars().filter(|c| c == &v).count() {
-                5 => {
-                    hand = HandsValue::FiveOf(hand_input.to_string());
-                    break;
+        let mut occurrences: Vec<(char, usize)> = vals
+            .iter()
+            .map(|v| {
+                let occs = hand_input.chars().filter(|c| c == v).count();
+                (*v, occs)
+            })
+            .collect();
+        occurrences.sort_by_key(|o| o.1);
+        let (v, max) = occurrences.last().unwrap();
+        let other_chars: Vec<char> = hand_input.chars().filter(|c| c != v && c != &'J').collect();
+
+        let jokers = hand_input.chars().filter(|c| c == &'J').count();
+        let hand = match max + jokers {
+            5 | 10 => HandsValue::FiveOf(hand_input.to_string()),
+            4 => HandsValue::FourOf(hand_input.to_string()),
+            3 => {
+                if other_chars[0] == other_chars[1] {
+                    HandsValue::FullHouse(hand_input.to_string())
+                } else {
+                    HandsValue::ThreeOf(hand_input.to_string())
                 }
-                4 => {
-                    hand = HandsValue::FourOf(hand_input.to_string());
-                    break;
-                }
-                3 => {
-                    let other_chars: Vec<char> = hand_input.chars().filter(|c| c != &v).collect();
-                    if other_chars[0] == other_chars[1] {
-                        hand = HandsValue::FullHouse(hand_input.to_string())
-                    } else {
-                        hand = HandsValue::ThreeOf(hand_input.to_string())
-                    }
-                }
-                2 => {
-                    let other_chars: Vec<char> = hand_input.chars().filter(|c| c != &v).collect();
-                    if other_chars[0] == other_chars[1] && other_chars[1] == other_chars[2] {
-                        hand = HandsValue::FullHouse(hand_input.to_string());
-                    } else if other_chars[0] == other_chars[1]
-                        || other_chars[1] == other_chars[2]
-                        || other_chars[2] == other_chars[0]
-                    {
-                        hand = HandsValue::TwoPairs(hand_input.to_string())
-                    } else {
-                        hand = HandsValue::OnePair(hand_input.to_string())
-                    }
-                }
-                _ => {}
             }
-        }
+            2 => {
+                if other_chars[0] == other_chars[1] && other_chars[1] == other_chars[2] {
+                    HandsValue::FullHouse(hand_input.to_string())
+                } else if other_chars[0] == other_chars[1]
+                    || other_chars[1] == other_chars[2]
+                    || other_chars[2] == other_chars[0]
+                {
+                    HandsValue::TwoPairs(hand_input.to_string())
+                } else {
+                    HandsValue::OnePair(hand_input.to_string())
+                }
+            }
+            _ => HandsValue::HighCard(hand_input.to_string()),
+        };
 
         Hand {
             hand,
@@ -82,6 +83,32 @@ impl Hand {
             bid: bid_input.parse().unwrap(),
         }
     }
+}
+
+fn determine_weakness(h1: &Hand, h2: &Hand) -> std::cmp::Ordering {
+    for i in 0..5 {
+        let vals = [
+            'A', 'K', 'Q', 'T', '9', '8', '7', '6', '5', '4', '3', '2', 'J',
+        ];
+        // let c1 = h1.hand
+        // println!("{h1:?}");
+        let c1 = vals
+            .iter()
+            .enumerate()
+            .find(|c| *c.1 == h1.input.chars().nth(i).unwrap())
+            .unwrap();
+        let c2 = vals
+            .iter()
+            .enumerate()
+            .find(|c| *c.1 == h2.input.chars().nth(i).unwrap())
+            .unwrap();
+
+        if c2.0.cmp(&c1.0) != std::cmp::Ordering::Equal {
+            // println!("h1 vs h2: {:?}", c2.0.cmp(&c1.0));
+            return c2.0.cmp(&c1.0);
+        }
+    }
+    std::cmp::Ordering::Equal
 }
 
 impl Hands {
@@ -104,29 +131,7 @@ impl Hands {
                 | (HandsValue::OnePair(_), HandsValue::OnePair(_))
                 | (HandsValue::HighCard(_), HandsValue::HighCard(_)) => {
                     // println!("equal???: {h1:?}, and {h2:?}");
-                    for i in 0..5 {
-                        let vals = [
-                            'A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2',
-                        ];
-                        // let c1 = h1.hand
-                        // println!("{h1:?}");
-                        let c1 = vals
-                            .iter()
-                            .enumerate()
-                            .find(|c| *c.1 == h1.input.chars().nth(i).unwrap())
-                            .unwrap();
-                        let c2 = vals
-                            .iter()
-                            .enumerate()
-                            .find(|c| *c.1 == h2.input.chars().nth(i).unwrap())
-                            .unwrap();
-
-                        if c2.0.cmp(&c1.0) != std::cmp::Ordering::Equal {
-                            // println!("h1 vs h2: {:?}", c2.0.cmp(&c1.0));
-                            return c2.0.cmp(&c1.0);
-                        }
-                    }
-                    std::cmp::Ordering::Equal
+                    determine_weakness(h1, h2)
                 }
                 (_, _) => h1.hand.partial_cmp(&h2.hand).unwrap(),
             }
@@ -206,6 +211,34 @@ mod tests {
         if let HandsValue::OnePair(_) = hand.hand {
         } else {
             panic!("oh no QQ9AT is not a pair {hand:?}")
+        }
+    }
+    #[test]
+    fn high_card() {
+        let hand = Hand::new("23456 2".to_string());
+        if let HandsValue::HighCard(_) = hand.hand {
+        } else {
+            panic!("oh no QQ9AT is not a pair {hand:?}")
+        }
+    }
+    #[test]
+    fn weaknesses() {
+        let h1 = Hand::new("KTJJT 1".to_string());
+        let h2 = Hand::new("QQQJA 1".to_string());
+
+        assert_eq!(determine_weakness(&h1, &h2), std::cmp::Ordering::Greater);
+        let h1 = Hand::new("KKKKK 1".to_string());
+        let h2 = Hand::new("JJJJJ 1".to_string());
+
+        assert_eq!(determine_weakness(&h1, &h2), std::cmp::Ordering::Greater);
+    }
+    #[test]
+    fn hand_parse() {
+        let h1 = Hand::new("JJ667 1".to_string());
+
+        if let HandsValue::FourOf(_) = h1.hand {
+        } else {
+            panic!("oh no")
         }
     }
 }
