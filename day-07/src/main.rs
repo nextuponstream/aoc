@@ -42,6 +42,7 @@ impl Hand {
 
         let mut occurrences: Vec<(char, usize)> = vals
             .iter()
+            .filter(|c| *c != &'J')
             .map(|v| {
                 let occs = hand_input.chars().filter(|c| c == v).count();
                 (*v, occs)
@@ -76,6 +77,7 @@ impl Hand {
             }
             _ => HandsValue::HighCard(hand_input.to_string()),
         };
+        // println!("{v} {max} {hand:?}");
 
         Hand {
             hand,
@@ -217,6 +219,14 @@ mod tests {
     fn high_card() {
         let hand = Hand::new("23456 2".to_string());
         if let HandsValue::HighCard(_) = hand.hand {
+        } else {
+            panic!("oh no QQ9AT is not a pair {hand:?}")
+        }
+    }
+    #[test]
+    fn jokers() {
+        let hand = Hand::new("K54JJ 2".to_string());
+        if let HandsValue::ThreeOf(_) = hand.hand {
         } else {
             panic!("oh no QQ9AT is not a pair {hand:?}")
         }
