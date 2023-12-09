@@ -34,23 +34,48 @@ impl NetworkMap {
             mappings,
         }
     }
-    fn steps(&self) -> usize {
-        let mut step = "AAA".to_string();
+    fn steps(&self) -> u64 {
+        // second number is number of steps to reach Z for first time
+        let mut nodes: Vec<(String, u64)> = self
+            .mappings
+            .iter()
+            .map(|m| (m.0.to_string(), 0))
+            .filter(|n| n.0.ends_with('A'))
+            .collect();
+        let initial_nodes_count = nodes.len();
+        println!("initial starting nodes: {initial_nodes_count}");
         let mut instruction_counter = 0;
         let mut step_count = 0;
 
-        while step != "ZZZ" {
+        while nodes.iter().filter(|n| n.0.ends_with('Z')).count() != initial_nodes_count
+            && nodes.iter().filter(|n| n.1 > 0).count() != initial_nodes_count
+        {
             // println!("{self:?}");
-            let mapping = self.mappings.iter().find(|m| m.0 == step).unwrap();
-            step = match self.instructions[instruction_counter] {
-                false => mapping.1 .0.to_string(),
-                true => mapping.1 .1.to_string(),
-            };
+            nodes = nodes
+                .iter()
+                .map(|n| {
+                    let mapping = self.mappings.iter().find(|m| m.0 == n.0).unwrap();
+                    let m = match self.instructions[instruction_counter] {
+                        false => mapping.1 .0.to_string(),
+                        true => mapping.1 .1.to_string(),
+                    };
+                    if n.1 == 0 && m.ends_with('Z') {
+                        (m, step_count + 1)
+                    } else {
+                        (m, n.1)
+                    }
+                })
+                .collect();
             instruction_counter = (instruction_counter + 1) % self.instructions.len();
             step_count += 1;
         }
 
-        step_count
+        if nodes.iter().filter(|n| n.1 > 0).count() == initial_nodes_count {
+            // wrong...
+            nodes.iter().map(|n| n.1).fold(1, num::integer::lcm)
+        } else {
+            step_count
+        }
     }
 }
 
