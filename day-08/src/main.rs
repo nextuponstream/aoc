@@ -71,7 +71,9 @@ impl NetworkMap {
         }
 
         if nodes.iter().filter(|n| n.1 > 0).count() == initial_nodes_count {
-            // wrong...
+            // you can observe in the example that starting node 1 reaches Z
+            // every 2 steps and starting node 2 in 3. Then the answer can be
+            // computed rather than brute forced
             nodes.iter().map(|n| n.1).fold(1, num::integer::lcm)
         } else {
             step_count
